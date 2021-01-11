@@ -1,0 +1,12 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+
+  <include file="$(find service_robot)/launch/gazebo.launch"/>
+  <include file="$(find service_robot)/launch/laserconvert.launch"/>
+  <include file="$(find service_robot)/launch/navigation.launch">
+     <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+     <arg name="initial_pose_y" value="$(arg initial_pose_x)"/>
+  </include>
+</launch>

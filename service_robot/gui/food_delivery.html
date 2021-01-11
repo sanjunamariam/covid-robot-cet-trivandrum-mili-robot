@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script src="/home/mch_agv/service_robot_ws/src/service_robot/gui/roslib.js"></script>
+
+<script>
+  // Connecting to ROS
+  // -----------------
+  var ros = new ROSLIB.Ros();
+
+  // If there is an error on the backend, an 'error' emit will be emitted.
+  ros.on('error', function(error) {
+    document.getElementById('connecting').style.display = 'none';
+    document.getElementById('connected').style.display = 'none';
+    document.getElementById('closed').style.display = 'none';
+    document.getElementById('error').style.display = 'inline';
+    console.log(error);
+  });
+
+  // Find out exactly when we made a connection.
+  ros.on('connection', function() {
+    console.log('Connection made!');
+    document.getElementById('connecting').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('closed').style.display = 'none';
+    document.getElementById('connected').style.display = 'inline';
+  });
+
+  ros.on('close', function() {
+    console.log('Connection closed.');
+    document.getElementById('connecting').style.display = 'none';
+    document.getElementById('connected').style.display = 'none';
+    document.getElementById('closed').style.display = 'inline';
+  });
+
+  // Create a connection to the rosbridge WebSocket server.
+  ros.connect('ws://localhost:9090');
+
+
+  var robotSound = new ROSLIB.Topic({
+    ros : ros,
+    name : '/robotsound',
+    messageType : 'sound_play/SoundRequest'
+  });
+
+  var sound_request = new ROSLIB.Message({
+    sound :-3,
+    command : 1,
+    volume : 1,
+   arg: "HI I AM SAKHI. I AM HERE TO SERVICE YOU",
+   arg2: "voice_kal_diphone"
+  })
+
+  robotSound.publish(sound_request); 
+
+  // Publishing a Topic
+  // ------------------
+function food_delivery(){
+  // First, we create a Topic object with details of the topic's name and message type.
+  var cmdVel = new ROSLIB.Topic({
+    ros : ros,
+    name : '/move_base/goal',
+    messageType : 'move_base_msgs/MoveBaseActionGoal'
+  });
+
+
+var bed_pose = [ [[6.53455303839,-0.301368417992,0.0,0.0,0.0838886879718,0.996475131667], [2.89349078541,-4.01118040539,0.0,0.0,-0.693596686355,0.7203635448], [2.8091312992,1.3330471788,0.0,0.0,0.668284745853,0.74390557093]], [[2.82064349767,4.0918533739,0.0,0.0,0.740960129022,0.671549020698], [1.99652095751,-0.778790460537,0.0,0.0,-0.681435497578,0.731878174726], [3.5322294104,0.293789110464,0.0,0.0,0.133509771085,0.991047496856]]];
+    bedRow = 0 + Number(document.getElementById('bedRow').value) - 1;
+    startbedNo = 0 + Number(document.getElementById('startbedNo').value)- 1 ;
+    endbedNo = 0 + Number(document.getElementById('endbedNo').value)- 1 ;
+
+
+(function theLoop (bedNo) {
+	var twist = new ROSLIB.Message({
+
+	goal : {
+		target_pose : {
+			header : {
+
+			
+		   		frame_id : "map"
+		   		
+				},
+		  
+			pose : {
+			   position : {
+					      x: bed_pose[bedRow][bedNo][0],
+					      y: bed_pose[bedRow][bedNo][1],
+					      z: 0.0
+				      },
+			  
+			   orientation : {
+				     
+					      x: bed_pose[bedRow][bedNo][2],
+					      y: bed_pose[bedRow][bedNo][3],
+					      z: bed_pose[bedRow][bedNo][4],
+					      w: bed_pose[bedRow][bedNo][5]
+				      }
+			   	}
+			}
+        	}
+     });
+
+
+
+
+  // And finally, publish.
+  cmdVel.publish(twist);
+
+
+console.log(twist);
+  setTimeout(function () {
+     
+	 
+    if (++bedNo<=endbedNo) { 
+	
+          // If i > 0, keep going
+      theLoop(bedNo); 
+	  var robotSoundHome = new ROSLIB.Topic({
+    ros : ros,
+    name : '/robotsound',
+    messageType : 'sound_play/SoundRequest'
+  });
+
+  var sound_request = new ROSLIB.Message({
+    sound :-3,
+    command : 1,
+    volume : 1,
+   arg: "I HAVE REACHED THE GOAL",
+   arg2: "voice_kal_diphone"
+  })
+
+  robotSoundHome.publish(sound_request);  
+	     // Call the loop again, and pass it the current value of i
+    }
+  }, 10000);
+})(startbedNo);
+
+
+}
+
+
+    // Set the appropriate values on the message object
+    //twist.goal.target_pose.position.x = bedRow;
+    //twist.goal.target_pose.position.y = bedNo;
+  //Subscribing to a Topic
+  //----------------------
+
+  // Like when publishing a topic, we first create a Topic object with details of the topic's name
+  // and message type. Note that we can call publish or subscribe on the same topic object.
+  var listener = new ROSLIB.Topic({
+    ros : ros,
+    name : '/listener',
+    messageType : 'std_msgs/String'
+  });
+
+  // Then we add a callback to be called every time a message is published on this topic.
+  listener.subscribe(function(message) {
+    console.log('Received message on ' + listener.name + ': ' + message.data);
+
+    // If desired, we can unsubscribe from the topic as well.
+    listener.unsubscribe();
+  });
+
+
+  
+
+
+</script>
+</head>
+
+<body>
+
+ <form name="Input">
+
+<table>
+ <tr><td>Enter Bed Row:</td><td><input id="bedRow" name="bedRow" type="text" /></td></tr>
+ <tr><td>Enter Starting Bed Number:</td><td><input id="startbedNo" name="startbedNo" type="text" /></td></tr>
+ <tr><td>Enter Ending Bed Number:</td><td><input id="endbedNo" name="endbedNo" type="text" /></td></tr>
+</table>
+<button id="sendMsg" type="button" onclick="food_delivery()">MOVE TO POSITION</button>
+</form>
+  <div id="statusIndicator">
+    <p id="connecting">
+      Connecting to rosbridge...
+    </p>
+    <p id="connected" style="color:#00D600; display:none">
+      Connected
+    </p>
+    <p id="error" style="color:#FF0000; display:none">
+      Error in the backend!
+    </p>
+    <p id="closed" style="display:none">
+      Connection closed.
+    </p>
+  </div>
+
+
+</body>
+</html>

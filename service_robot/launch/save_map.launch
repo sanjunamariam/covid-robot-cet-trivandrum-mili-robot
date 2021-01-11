@@ -1,0 +1,5 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="map_name" default="$(find service_robot)/maps/map_mch"/>
+  <node pkg="map_server" type="map_saver" name="map_saver" args="-f $(arg map_name)"/>
+</launch>

@@ -1,0 +1,14 @@
+Global planner:
+  lethal_cost: 253
+  neutral_cost: 66
+  cost_factor: 0.55
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+
+  update_frequency: 10.0
+  publish_frequency: 10.0
+  transform_tolerance: 0.5
+
+  static_map: true
+ 

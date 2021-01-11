@@ -1,0 +1,15 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="open_rviz" default="true"/>
+
+ <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find service_robot)/urdf/service_robot.urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
+  <!-- SLAM: Gmapping, Cartographer, Hector, Karto, Frontier_exploration, RTAB-Map -->
+  <include file="$(find service_robot)/launch/gmapping.launch">
+    <arg name="configuration_basename" value="$(arg configuration_basename)"/>
+  </include>
+</launch>

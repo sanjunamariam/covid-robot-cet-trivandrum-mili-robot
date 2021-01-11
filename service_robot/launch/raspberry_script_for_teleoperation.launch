@@ -1,0 +1,12 @@
+<launch>
+  <arg name="arduino_port" default="/dev/ttyUSB0" />
+  <include file="$(find teleop_twist_joy)/launch/teleop.launch"/>
+  <node pkg="service_robot" name="vel_listener" type="CmdVel_to_Motor_arduino.py" output="screen"/> 
+  <node pkg="sound_play" name="soundplay_node" type="soundplay_node.py" output="screen"/> 
+ 
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node">
+    <param name="port" value="$(arg arduino_port)"/>
+    <param name="baud" value="57600"/>
+  </node> 
+ 
+</launch>
